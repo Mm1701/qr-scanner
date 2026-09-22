@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>QR BOX SCANNER</title>
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+</head>
+
+
+<body>
+
+<header class="topbar">
+
+    <button
+        id="backBtn"
+        class="secondary-btn"
+    >
+        ← DANH SÁCH
+    </button>
+
+
+    <strong id="fileTitle">
+        QR SCANNER
+    </strong>
+
+
+    <button
+        id="saveBtn"
+        class="primary-btn"
+    >
+        SAVE
+    </button>
+
+</header>
+
+
+<main class="scanner-page">
+
+
+    <!-- ===================================== -->
+    <!-- SCANNER -->
+    <!-- ===================================== -->
+
+    <section class="scanner-panel">
+
+        <div
+            id="pairTitle"
+            class="pair-title"
+        >
+            CẶP #1
+        </div>
+
+
+        <div
+            id="scanMode"
+            class="scan-mode old-mode"
+        >
+            🔵 QUÉT TEM CŨ
+        </div>
+
+
+        <div
+            id="conditionText"
+            class="condition-text"
+        ></div>
+
+
+        <div class="camera-box">
+
+            <video
+                id="camera"
+                autoplay
+                muted
+                playsinline
+            ></video>
+
+            <div class="scan-frame">
+
+                <div class="corner top-left"></div>
+                <div class="corner top-right"></div>
+                <div class="corner bottom-left"></div>
+                <div class="corner bottom-right"></div>
+
+            </div>
+
+            <div class="scan-line"></div>
+
+        </div>
+
+
+        <button
+            id="cameraBtn"
+            class="camera-btn"
+        >
+            📷 BẬT CAMERA
+        </button>
+
+
+        <div
+            id="scanMessage"
+            class="scan-message"
+        >
+            Bấm BẬT CAMERA để bắt đầu.
+        </div>
+
+
+        <div class="counter">
+
+            <div>
+                CẶP
+                <strong id="pairCount">
+                    0
+                </strong>
+            </div>
+
+            <div>
+                OLD
+                <strong id="oldCount">
+                    0
+                </strong>
+            </div>
+
+            <div>
+                NEW
+                <strong id="newCount">
+                    0
+                </strong>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ===================================== -->
+    <!-- PAIRS -->
+    <!-- ===================================== -->
+
+    <section class="pairs-panel">
+
+        <div class="pairs-header">
+
+            <div>
+
+                <h2>
+                    Danh sách cặp
+                </h2>
+
+                <span
+                    id="fileStatus"
+                    class="status draft"
+                >
+                    DRAFT
+                </span>
+
+            </div>
+
+
+            <button
+                id="refreshBtn"
+                class="secondary-btn small"
+            >
+                ↻
+            </button>
+
+        </div>
+
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            #
+                        </th>
+
+                        <th>
+                            oldBox
+                        </th>
+
+                        <th>
+                            newBox
+                        </th>
+
+                        <th>
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody
+                    id="pairTable"
+                ></tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="https://unpkg.com/@zxing/library@0.21.2/umd/index.min.js"></script>
+
+<script src="js/config.js"></script>
+
+<script src="js/supabase.js"></script>
+
+<script src="js/scanner.js"></script>
+
+</body>
+
+</html>

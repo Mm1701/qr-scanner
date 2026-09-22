@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>QR BOX SCANNER - Dashboard</title>
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+</head>
+
+
+<body>
+
+<header class="topbar">
+
+    <div class="topbar-title">
+        📦 QR BOX SCANNER
+    </div>
+
+    <div class="topbar-right">
+
+        <span id="usernameDisplay">
+            admin
+        </span>
+
+        <button
+            id="logoutBtn"
+            class="logout-btn"
+        >
+            ĐĂNG XUẤT
+        </button>
+
+    </div>
+
+</header>
+
+
+<main class="dashboard-page">
+
+    <div class="dashboard-header">
+
+        <div>
+
+            <h1>
+                Danh sách file
+            </h1>
+
+            <p>
+                Quản lý các file quét BOX
+            </p>
+
+        </div>
+
+
+        <button
+            id="createFileBtn"
+            class="primary-btn"
+        >
+            ＋ TẠO FILE MỚI
+        </button>
+
+    </div>
+
+
+    <div
+        id="fileList"
+        class="file-grid"
+    ></div>
+
+
+    <div
+        id="emptyState"
+        class="empty-state hidden"
+    >
+
+        <div class="empty-icon">
+            📦
+        </div>
+
+        <h2>
+            Chưa có file
+        </h2>
+
+        <p>
+            Bấm "TẠO FILE MỚI" để bắt đầu.
+        </p>
+
+    </div>
+
+</main>
+
+
+<!-- ========================================= -->
+<!-- CREATE FILE MODAL -->
+<!-- ========================================= -->
+
+<div
+    id="createModal"
+    class="modal hidden"
+>
+
+    <div class="modal-card">
+
+        <div class="modal-header">
+
+            <h2>
+                Tạo file mới
+            </h2>
+
+            <button
+                id="closeModalBtn"
+                class="modal-close"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>
+                Tên file
+            </label>
+
+            <input
+                id="fileName"
+                type="text"
+                placeholder="Ví dụ: BOX_20260922"
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>
+                Điều kiện OLD
+            </label>
+
+            <input
+                id="oldCondition"
+                type="text"
+                placeholder="Để trống = không kiểm tra"
+            >
+
+            <small>
+                QR OLD phải chứa chuỗi này.
+            </small>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>
+                Điều kiện NEW
+            </label>
+
+            <input
+                id="newCondition"
+                type="text"
+                placeholder="Để trống = không kiểm tra"
+            >
+
+            <small>
+                QR NEW phải chứa chuỗi này.
+            </small>
+
+        </div>
+
+
+        <div
+            id="createMessage"
+            class="form-message"
+        ></div>
+
+
+        <div class="modal-actions">
+
+            <button
+                id="cancelCreateBtn"
+                class="secondary-btn"
+            >
+                HỦY
+            </button>
+
+            <button
+                id="confirmCreateBtn"
+                class="primary-btn"
+            >
+                TẠO FILE
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<script src="js/config.js"></script>
+
+<script src="js/supabase.js"></script>
+
+<script src="js/dashboard.js"></script>
+
+</body>
+
+</html>

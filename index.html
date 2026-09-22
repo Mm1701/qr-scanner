@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>QR BOX SCANNER - LOGIN</title>
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+</head>
+
+<body class="login-body">
+
+    <div class="login-card">
+
+        <div class="login-logo">
+            📦
+        </div>
+
+        <h1>
+            QR BOX SCANNER
+        </h1>
+
+        <p class="login-subtitle">
+            Đăng nhập quản lý
+        </p>
+
+        <form id="loginForm">
+
+            <div class="form-group">
+
+                <label>
+                    Username
+                </label>
+
+                <input
+                    id="username"
+                    type="text"
+                    autocomplete="username"
+                    placeholder="Nhập username"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Password
+                </label>
+
+                <input
+                    id="password"
+                    type="password"
+                    autocomplete="current-password"
+                    placeholder="Nhập password"
+                    required
+                >
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="primary-btn login-btn"
+            >
+                ĐĂNG NHẬP
+            </button>
+
+        </form>
+
+
+        <div
+            id="loginMessage"
+            class="login-message"
+        ></div>
+
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script src="js/config.js"></script>
+
+    <script src="js/supabase.js"></script>d
+
+    <script src="js/auth.js"></script>
+
+</body>
+
+</html>
