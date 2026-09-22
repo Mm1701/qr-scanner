@@ -1302,41 +1302,41 @@ function renderPairs() {
    AUDIO
 ========================================================= */
 
+/* =========================================================
+   AUDIO + VIBRATION
+========================================================= */
+
 function initAudio() {
-
     try {
-
         if (!audioContext) {
-
             const AudioCtx =
                 window.AudioContext ||
                 window.webkitAudioContext;
 
-
             if (AudioCtx) {
-
-                audioContext =
-                    new AudioCtx();
+                audioContext = new AudioCtx();
             }
         }
 
-
         if (
             audioContext &&
-            audioContext.state ===
-                "suspended"
+            audioContext.state === "suspended"
         ) {
-
             audioContext.resume();
         }
-
+    } catch (error) {
+        console.warn("Không khởi tạo được âm thanh:", error);
     }
-    catch (error) {
+}
 
-        console.warn(
-            "Không khởi tạo được âm thanh:",
-            error
-        );
+
+function vibrate(pattern) {
+    try {
+        if ("vibrate" in navigator) {
+            navigator.vibrate(pattern);
+        }
+    } catch (error) {
+        console.warn("Không rung được:", error);
     }
 }
 
@@ -1345,74 +1345,49 @@ function playTone(
     frequency,
     duration,
     type = "sine",
-    volume = 0.08
+    volume = 0.30
 ) {
-
     try {
-
         initAudio();
 
-
-        if (!audioContext) {
-            return;
-        }
-
+        if (!audioContext) return;
 
         const oscillator =
             audioContext.createOscillator();
 
-
         const gain =
             audioContext.createGain();
 
+        oscillator.type = type;
+        oscillator.frequency.value = frequency;
 
-        oscillator.type =
-            type;
-
-
-        oscillator.frequency.value =
-            frequency;
-
+        const now = audioContext.currentTime;
 
         gain.gain.setValueAtTime(
             0.0001,
-            audioContext.currentTime
+            now
         );
-
 
         gain.gain.exponentialRampToValueAtTime(
             volume,
-            audioContext.currentTime +
-            0.01
+            now + 0.015
         );
-
 
         gain.gain.exponentialRampToValueAtTime(
             0.0001,
-            audioContext.currentTime +
-            duration
+            now + duration
         );
-
 
         oscillator.connect(gain);
+        gain.connect(audioContext.destination);
 
-        gain.connect(
-            audioContext.destination
-        );
-
-
-        oscillator.start();
-
+        oscillator.start(now);
 
         oscillator.stop(
-            audioContext.currentTime +
-            duration +
-            0.03
+            now + duration + 0.03
         );
 
-    }
-    catch (error) {
-
+    } catch (error) {
         console.warn(
             "Không phát được âm thanh:",
             error
@@ -1421,67 +1396,64 @@ function playTone(
 }
 
 
-/*
- * PASS:
- * 2 tiếng "beep beep"
- */
+/* =========================================================
+   PASS
+========================================================= */
 
 function playPassSound() {
 
+    // Rung nhẹ: 2 nhịp
+    vibrate([80, 50, 120]);
+
+    // Âm thanh PASS lớn hơn
     playTone(
         880,
-        0.10,
+        0.14,
         "sine",
-        0.10
+        0.32
     );
 
-
-    setTimeout(
-        () => {
-
-            playTone(
-                1320,
-                0.14,
-                "sine",
-                0.10
-            );
-
-        },
-        110
-    );
+    setTimeout(() => {
+        playTone(
+            1320,
+            0.18,
+            "sine",
+            0.36
+        );
+    }, 130);
 }
 
 
-/*
- * FAIL:
- * 2 tiếng cảnh báo thấp
- */
+/* =========================================================
+   FAIL
+========================================================= */
 
 function playFailSound() {
 
+    // Rung mạnh
+    vibrate([
+        180,
+        80,
+        180
+    ]);
+
+    // Âm FAIL thấp + mạnh
     playTone(
-        220,
+        240,
         0.20,
         "square",
-        0.08
+        0.38
     );
 
-
-    setTimeout(
-        () => {
-
-            playTone(
-                160,
-                0.22,
-                "square",
-                0.08
-            );
-
-        },
-        180
-    );
+    setTimeout(() => {
+        playTone(
+            160,
+            0.25,
+            "square",
+            0.40
+        );
+    }, 210);
 }
-
 
 /* =========================================================
    MESSAGE
