@@ -1,6 +1,10 @@
 "use strict";
 
 
+/* =========================================================
+   GLOBAL
+========================================================= */
+
 let fileId = null;
 
 let fileData = null;
@@ -22,9 +26,26 @@ let lastScanTime = 0;
 let videoElement = null;
 
 
-/* =========================================
+// =========================================================
+// CHỐNG QUÉT QUÁ NHANH
+// =========================================================
+
+let scanBusy = false;
+
+// Camera sẽ nghỉ 1 giây sau mỗi lần nhận QR
+const SCAN_COOLDOWN = 1000;
+
+
+// =========================================================
+// AUDIO
+// =========================================================
+
+let audioContext = null;
+
+
+/* =========================================================
    INIT
-========================================= */
+========================================================= */
 
 document.addEventListener(
     "DOMContentLoaded",
@@ -86,9 +107,9 @@ async function initScanner() {
 }
 
 
-/* =========================================
+/* =========================================================
    EVENTS
-========================================= */
+========================================================= */
 
 function setupEvents() {
 
@@ -131,9 +152,9 @@ function setupEvents() {
 }
 
 
-/* =========================================
+/* =========================================================
    LOAD FILE
-========================================= */
+========================================================= */
 
 async function loadFile() {
 
@@ -194,9 +215,9 @@ async function loadFile() {
 }
 
 
-/* =========================================
+/* =========================================================
    LOAD PAIRS
-========================================= */
+========================================================= */
 
 async function loadPairs() {
 
@@ -237,12 +258,14 @@ async function loadPairs() {
     currentOld = null;
 
     scanningType = "OLD";
+
+    scanBusy = false;
 }
 
 
-/* =========================================
+/* =========================================================
    CAMERA
-========================================= */
+========================================================= */
 
 async function toggleCamera() {
 
@@ -275,6 +298,10 @@ async function startCamera() {
 
     try {
 
+        // Bật AudioContext sau thao tác người dùng
+        initAudio();
+
+
         codeReader =
             new ZXing.BrowserQRCodeReader();
 
@@ -296,6 +323,7 @@ async function startCamera() {
             devices[0];
 
 
+        // Ưu tiên camera sau
         const rearCamera =
             devices.find(
                 device => {
@@ -325,6 +353,8 @@ async function startCamera() {
 
 
         scanning = true;
+
+        scanBusy = false;
 
 
         const button =
@@ -386,13 +416,15 @@ async function startCamera() {
 }
 
 
-/* =========================================
+/* =========================================================
    STOP CAMERA
-========================================= */
+========================================================= */
 
 function stopCamera() {
 
     scanning = false;
+
+    scanBusy = false;
 
 
     if (codeReader) {
@@ -405,6 +437,7 @@ function stopCamera() {
         catch (error) {
 
             console.error(error);
+
         }
 
     }
@@ -454,9 +487,9 @@ function stopCamera() {
 }
 
 
-/* =========================================
+/* =========================================================
    QR RESULT
-========================================= */
+========================================================= */
 
 async function handleQRCode(rawCode) {
 
@@ -466,53 +499,95 @@ async function handleQRCode(rawCode) {
 
 
     if (!code) {
-
         return;
     }
 
 
-    // chống camera đọc cùng QR liên tục
+    /*
+     * CAMERA CÓ THỂ ĐỌC CÙNG 1 QR
+     * TRONG NHIỀU FRAME LIÊN TIẾP.
+     *
+     * scanBusy giúp khóa hoàn toàn
+     * trong lúc đang xử lý QR.
+     */
+
+    if (scanBusy) {
+        return;
+    }
+
+
     const now =
         Date.now();
 
 
     if (
         code === lastScannedCode &&
-        now - lastScanTime < 1500
+        now - lastScanTime <
+            SCAN_COOLDOWN
     ) {
 
         return;
     }
 
 
+    scanBusy = true;
+
+
     lastScannedCode =
         code;
+
 
     lastScanTime =
         now;
 
 
-    if (
-        scanningType === "OLD"
-    ) {
+    try {
 
-        await handleOld(
-            code
-        );
+        if (
+            scanningType === "OLD"
+        ) {
+
+            await handleOld(
+                code
+            );
+
+        }
+        else {
+
+            await handleNew(
+                code
+            );
+        }
 
     }
-    else {
+    catch (error) {
 
-        await handleNew(
-            code
+        console.error(error);
+
+    }
+    finally {
+
+        /*
+         * Cho camera nghỉ 1 giây.
+         * Điều này giúp người dùng có thời gian
+         * đưa tem tiếp theo vào camera.
+         */
+
+        setTimeout(
+            () => {
+
+                scanBusy = false;
+
+            },
+            SCAN_COOLDOWN
         );
     }
 }
 
 
-/* =========================================
+/* =========================================================
    OLD
-========================================= */
+========================================================= */
 
 async function handleOld(code) {
 
@@ -523,33 +598,52 @@ async function handleOld(code) {
         ).trim();
 
 
+    /*
+     * KIỂM TRA ĐIỀU KIỆN OLD
+     */
+
     if (
         condition &&
         !code.includes(condition)
     ) {
 
+        playFailSound();
+
+
         setMessage(
-            `OLD không hợp lệ.\nQR phải chứa: ${condition}`,
+            `❌ OLD không hợp lệ.\nQR phải chứa: ${condition}`,
             "error"
         );
+
 
         return;
     }
 
 
-    // Không cho QR đã từng xuất hiện
+    /*
+     * KHÔNG CHO QR ĐÃ TỪNG XUẤT HIỆN
+     */
+
     if (
         isDuplicateCode(code)
     ) {
 
+        playFailSound();
+
+
         setMessage(
-            "QR này đã được quét trước đó.",
+            "❌ QR này đã được quét trước đó.",
             "error"
         );
+
 
         return;
     }
 
+
+    /*
+     * LƯU OLD
+     */
 
     currentOld =
         code;
@@ -559,8 +653,11 @@ async function handleOld(code) {
         "NEW";
 
 
+    playPassSound();
+
+
     setMessage(
-        `OLD OK: ${code}\n→ Bây giờ quét NEW`,
+        `✓ OLD OK\n${code}\n\n→ Bây giờ quét NEW`,
         "success"
     );
 
@@ -569,9 +666,9 @@ async function handleOld(code) {
 }
 
 
-/* =========================================
+/* =========================================================
    NEW
-========================================= */
+========================================================= */
 
 async function handleNew(code) {
 
@@ -580,11 +677,39 @@ async function handleNew(code) {
         scanningType =
             "OLD";
 
+
         updateUI();
+
 
         return;
     }
 
+
+    /*
+     * QUAN TRỌNG:
+     * OLD VÀ NEW KHÔNG ĐƯỢC TRÙNG NHAU
+     */
+
+    if (
+        code === currentOld
+    ) {
+
+        playFailSound();
+
+
+        setMessage(
+            "❌ OLD và NEW không được trùng nhau.\n\nHãy quét NEW khác.",
+            "error"
+        );
+
+
+        return;
+    }
+
+
+    /*
+     * KIỂM TRA ĐIỀU KIỆN NEW
+     */
 
     const condition =
         (
@@ -598,27 +723,43 @@ async function handleNew(code) {
         !code.includes(condition)
     ) {
 
+        playFailSound();
+
+
         setMessage(
-            `NEW không hợp lệ.\nQR phải chứa: ${condition}`,
+            `❌ NEW không hợp lệ.\nQR phải chứa: ${condition}`,
             "error"
         );
+
 
         return;
     }
 
+
+    /*
+     * KHÔNG CHO QR ĐÃ TỪNG XUẤT HIỆN
+     */
 
     if (
         isDuplicateCode(code)
     ) {
 
+        playFailSound();
+
+
         setMessage(
-            "QR này đã được quét trước đó.",
+            "❌ QR này đã được quét trước đó.",
             "error"
         );
+
 
         return;
     }
 
+
+    /*
+     * SEQUENCE
+     */
 
     const nextSequence =
         pairs.length + 1;
@@ -652,16 +793,23 @@ async function handleNew(code) {
 
         if (error) {
 
-            // duplicate từ database
+            /*
+             * DATABASE DUPLICATE
+             */
+
             if (
                 error.code ===
                 "23505"
             ) {
 
+                playFailSound();
+
+
                 setMessage(
-                    "QR bị trùng trong database.",
+                    "❌ QR bị trùng trong database.",
                     "error"
                 );
+
 
                 return;
             }
@@ -671,14 +819,29 @@ async function handleNew(code) {
         }
 
 
+        /*
+         * THÊM VÀO DANH SÁCH
+         */
+
         pairs.push(data);
 
 
+        /*
+         * PASS
+         */
+
+        playPassSound();
+
+
         setMessage(
-            `OK: ${currentOld} → ${code}`,
+            `✓ PASS\n\nOLD: ${currentOld}\nNEW: ${code}`,
             "success"
         );
 
+
+        /*
+         * RESET VỀ OLD
+         */
 
         currentOld =
             null;
@@ -695,8 +858,12 @@ async function handleNew(code) {
 
         console.error(error);
 
+
+        playFailSound();
+
+
         setMessage(
-            "Lưu cặp thất bại:\n" +
+            "❌ Lưu cặp thất bại:\n" +
             error.message,
             "error"
         );
@@ -704,9 +871,9 @@ async function handleNew(code) {
 }
 
 
-/* =========================================
+/* =========================================================
    DUPLICATE
-========================================= */
+========================================================= */
 
 function isDuplicateCode(code) {
 
@@ -718,9 +885,9 @@ function isDuplicateCode(code) {
 }
 
 
-/* =========================================
+/* =========================================================
    DELETE PAIR
-========================================= */
+========================================================= */
 
 async function deletePair(id) {
 
@@ -766,6 +933,7 @@ async function deletePair(id) {
 
         console.error(error);
 
+
         alert(
             "Xóa thất bại:\n" +
             error.message
@@ -774,9 +942,9 @@ async function deletePair(id) {
 }
 
 
-/* =========================================
+/* =========================================================
    RENUMBER
-========================================= */
+========================================================= */
 
 async function renumberPairs() {
 
@@ -834,9 +1002,9 @@ async function renumberPairs() {
 }
 
 
-/* =========================================
+/* =========================================================
    SAVE
-========================================= */
+========================================================= */
 
 async function saveFile() {
 
@@ -845,6 +1013,7 @@ async function saveFile() {
         alert(
             "Đang có OLD chưa ghép NEW.\n\nHãy quét NEW trước khi SAVE."
         );
+
 
         return;
     }
@@ -855,6 +1024,7 @@ async function saveFile() {
         alert(
             "Chưa có cặp nào."
         );
+
 
         return;
     }
@@ -923,6 +1093,9 @@ async function saveFile() {
             "status saved";
 
 
+        playPassSound();
+
+
         setMessage(
             "✓ ĐÃ SAVE FILE",
             "success"
@@ -933,6 +1106,10 @@ async function saveFile() {
 
         console.error(error);
 
+
+        playFailSound();
+
+
         alert(
             "SAVE thất bại:\n" +
             error.message
@@ -941,9 +1118,9 @@ async function saveFile() {
 }
 
 
-/* =========================================
+/* =========================================================
    UI
-========================================= */
+========================================================= */
 
 function updateUI() {
 
@@ -966,6 +1143,7 @@ function updateUI() {
         mode.textContent =
             "🔵 QUÉT TEM CŨ";
 
+
         mode.className =
             "scan-mode old-mode";
 
@@ -974,6 +1152,7 @@ function updateUI() {
 
         mode.textContent =
             "🟢 QUÉT TEM MỚI";
+
 
         mode.className =
             "scan-mode new-mode";
@@ -1042,9 +1221,9 @@ function updateUI() {
 }
 
 
-/* =========================================
+/* =========================================================
    RENDER PAIRS
-========================================= */
+========================================================= */
 
 function renderPairs() {
 
@@ -1070,6 +1249,7 @@ function renderPairs() {
             </tr>
 
         `;
+
 
         return;
     }
@@ -1118,9 +1298,194 @@ function renderPairs() {
 }
 
 
-/* =========================================
+/* =========================================================
+   AUDIO
+========================================================= */
+
+function initAudio() {
+
+    try {
+
+        if (!audioContext) {
+
+            const AudioCtx =
+                window.AudioContext ||
+                window.webkitAudioContext;
+
+
+            if (AudioCtx) {
+
+                audioContext =
+                    new AudioCtx();
+            }
+        }
+
+
+        if (
+            audioContext &&
+            audioContext.state ===
+                "suspended"
+        ) {
+
+            audioContext.resume();
+        }
+
+    }
+    catch (error) {
+
+        console.warn(
+            "Không khởi tạo được âm thanh:",
+            error
+        );
+    }
+}
+
+
+function playTone(
+    frequency,
+    duration,
+    type = "sine",
+    volume = 0.08
+) {
+
+    try {
+
+        initAudio();
+
+
+        if (!audioContext) {
+            return;
+        }
+
+
+        const oscillator =
+            audioContext.createOscillator();
+
+
+        const gain =
+            audioContext.createGain();
+
+
+        oscillator.type =
+            type;
+
+
+        oscillator.frequency.value =
+            frequency;
+
+
+        gain.gain.setValueAtTime(
+            0.0001,
+            audioContext.currentTime
+        );
+
+
+        gain.gain.exponentialRampToValueAtTime(
+            volume,
+            audioContext.currentTime +
+            0.01
+        );
+
+
+        gain.gain.exponentialRampToValueAtTime(
+            0.0001,
+            audioContext.currentTime +
+            duration
+        );
+
+
+        oscillator.connect(gain);
+
+        gain.connect(
+            audioContext.destination
+        );
+
+
+        oscillator.start();
+
+
+        oscillator.stop(
+            audioContext.currentTime +
+            duration +
+            0.03
+        );
+
+    }
+    catch (error) {
+
+        console.warn(
+            "Không phát được âm thanh:",
+            error
+        );
+    }
+}
+
+
+/*
+ * PASS:
+ * 2 tiếng "beep beep"
+ */
+
+function playPassSound() {
+
+    playTone(
+        880,
+        0.10,
+        "sine",
+        0.10
+    );
+
+
+    setTimeout(
+        () => {
+
+            playTone(
+                1320,
+                0.14,
+                "sine",
+                0.10
+            );
+
+        },
+        110
+    );
+}
+
+
+/*
+ * FAIL:
+ * 2 tiếng cảnh báo thấp
+ */
+
+function playFailSound() {
+
+    playTone(
+        220,
+        0.20,
+        "square",
+        0.08
+    );
+
+
+    setTimeout(
+        () => {
+
+            playTone(
+                160,
+                0.22,
+                "square",
+                0.08
+            );
+
+        },
+        180
+    );
+}
+
+
+/* =========================================================
    MESSAGE
-========================================= */
+========================================================= */
 
 function setMessage(
     text,
@@ -1143,9 +1508,9 @@ function setMessage(
 }
 
 
-/* =========================================
+/* =========================================================
    BACK
-========================================= */
+========================================================= */
 
 function goBack() {
 
@@ -1172,9 +1537,9 @@ function goBack() {
 }
 
 
-/* =========================================
+/* =========================================================
    ESCAPE HTML
-========================================= */
+========================================================= */
 
 function escapeHtml(value) {
 
