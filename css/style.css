@@ -1083,3 +1083,222 @@ th {
     }
 
 }
+
+
+/* =========================================================
+   MOBILE SCANNER - OPTIMIZED
+========================================================= */
+
+@media (max-width: 800px) {
+
+    body {
+        overflow-x: hidden;
+    }
+
+    .topbar {
+        position: sticky;
+        top: 0;
+        min-height: 58px;
+        padding: 8px 10px;
+        gap: 8px;
+        z-index: 1000;
+    }
+
+    .topbar strong,
+    #fileTitle {
+        max-width: 42vw;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 14px;
+    }
+
+    .topbar .secondary-btn,
+    .topbar .primary-btn {
+        min-height: 42px;
+        padding: 9px 11px;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .scanner-page {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 8px;
+    }
+
+    .scanner-panel,
+    .pairs-panel {
+        width: 100%;
+        padding: 12px;
+        border-radius: 12px;
+    }
+
+    .scanner-panel {
+        order: 1;
+    }
+
+    .pairs-panel {
+        order: 2;
+    }
+
+    .pair-title {
+        font-size: 20px;
+        margin-bottom: 8px;
+    }
+
+    .scan-mode {
+        padding: 11px 8px;
+        font-size: 14px;
+        margin-bottom: 7px;
+    }
+
+    .condition-text {
+        margin-bottom: 8px;
+        font-size: 12px;
+    }
+
+    .camera-box {
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        max-height: none;
+        border-radius: 10px;
+    }
+
+    .scan-frame {
+        inset: 15%;
+    }
+
+    .corner {
+        width: 30px;
+        height: 30px;
+    }
+
+    .camera-btn {
+        min-height: 48px;
+        margin-top: 10px;
+        font-size: 15px;
+        border-radius: 10px;
+    }
+
+    .scan-message {
+        min-height: 62px;
+        margin-top: 8px;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 700;
+        line-height: 1.35;
+    }
+
+    .counter {
+        margin-top: 8px;
+        gap: 5px;
+    }
+
+    .counter div {
+        padding: 8px 4px;
+        font-size: 11px;
+    }
+
+    .counter strong {
+        font-size: 20px;
+    }
+
+    .pairs-header {
+        margin-bottom: 8px;
+    }
+
+    .pairs-header h2 {
+        font-size: 17px;
+    }
+
+    .table-wrapper {
+        max-height: 420px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+        min-width: 430px;
+    }
+
+    th,
+    td {
+        padding: 8px 6px;
+        font-size: 12px;
+    }
+
+    .qr-cell {
+        max-width: 180px;
+        word-break: break-all;
+    }
+
+    .delete-row-btn {
+        width: 36px;
+        height: 36px;
+    }
+}
+
+
+/* =========================================================
+   VERY SMALL PHONE
+========================================================= */
+
+@media (max-width: 450px) {
+
+    .topbar {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        height: 58px;
+        min-height: 58px;
+    }
+
+    .topbar strong,
+    #fileTitle {
+        max-width: 100%;
+        text-align: center;
+        font-size: 13px;
+    }
+
+    .topbar .secondary-btn,
+    .topbar .primary-btn {
+        min-height: 40px;
+        padding: 8px 9px;
+        font-size: 11px;
+    }
+
+    .scanner-page {
+        padding: 6px;
+    }
+
+    .scanner-panel {
+        padding: 10px;
+    }
+
+    .camera-box {
+        border-radius: 8px;
+    }
+
+    .scan-frame {
+        inset: 12%;
+    }
+
+    .scan-line {
+        left: 15%;
+        right: 15%;
+    }
+
+    .scan-message {
+        min-height: 68px;
+        font-size: 12px;
+    }
+
+    .counter strong {
+        font-size: 18px;
+    }
+}
