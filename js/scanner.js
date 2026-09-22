@@ -1124,68 +1124,80 @@ async function saveFile() {
 
 function updateUI() {
 
-    document.getElementById(
-        "pairTitle"
-    ).textContent =
+    document.getElementById("pairTitle").textContent =
         `CẶP #${pairs.length + 1}`;
 
-
     const mode =
-        document.getElementById(
-            "scanMode"
-        );
+        document.getElementById("scanMode");
+
+    const currentOldBox =
+        document.getElementById("currentOldBox");
+
+    const currentOldValue =
+        document.getElementById("currentOldValue");
 
 
-    if (
-        scanningType === "OLD"
-    ) {
+    /* =====================================================
+       OLD MODE
+    ===================================================== */
+
+    if (scanningType === "OLD") {
 
         mode.textContent =
             "🔵 QUÉT TEM CŨ";
 
-
         mode.className =
             "scan-mode old-mode";
 
+        // Không có OLD đang chờ
+        currentOldBox.classList.add("hidden");
+
     }
+
+
+    /* =====================================================
+       NEW MODE
+    ===================================================== */
+
     else {
 
         mode.textContent =
             "🟢 QUÉT TEM MỚI";
 
-
         mode.className =
             "scan-mode new-mode";
+
+
+        // Hiện OLD đang được ghép
+        currentOldBox.classList.remove("hidden");
+
+        currentOldValue.textContent =
+            currentOld || "-";
     }
 
 
+    /* =====================================================
+       CONDITION
+    ===================================================== */
+
     const condition =
-        document.getElementById(
-            "conditionText"
-        );
+        document.getElementById("conditionText");
 
 
-    if (
-        scanningType === "OLD"
-    ) {
+    if (scanningType === "OLD") {
 
         const value =
-            fileData?.old_condition ||
-            "";
-
+            fileData?.old_condition || "";
 
         condition.textContent =
             value
                 ? `Điều kiện OLD: ${value}`
                 : "OLD: Không giới hạn";
 
-    }
-    else {
+    } else {
 
         const value =
-            fileData?.new_condition ||
-            "";
-
+            fileData?.new_condition || "";
 
         condition.textContent =
             value
@@ -1194,32 +1206,27 @@ function updateUI() {
     }
 
 
-    document.getElementById(
-        "pairCount"
-    ).textContent =
-        pairs.length;
+    /* =====================================================
+       COUNTER
+    ===================================================== */
+
+    document.getElementById("pairCount")
+        .textContent = pairs.length;
+
+    document.getElementById("oldCount")
+        .textContent =
+        pairs.length + (currentOld ? 1 : 0);
+
+    document.getElementById("newCount")
+        .textContent = pairs.length;
 
 
-    document.getElementById(
-        "oldCount"
-    ).textContent =
-        pairs.length +
-        (
-            currentOld
-                ? 1
-                : 0
-        );
-
-
-    document.getElementById(
-        "newCount"
-    ).textContent =
-        pairs.length;
-
+    /* =====================================================
+       TABLE
+    ===================================================== */
 
     renderPairs();
 }
-
 
 /* =========================================================
    RENDER PAIRS
