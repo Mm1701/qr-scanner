@@ -56,11 +56,29 @@
 
     <section class="scanner-panel">
 
-        <div
-            id="pairTitle"
-            class="pair-title"
-        >
-            CẶP #1
+        <div class="pair-head">
+
+            <div
+                id="pairTitle"
+                class="pair-title"
+            >
+                CẶP #1
+            </div>
+
+            <div class="session-stats">
+
+                <div class="stat-chip">
+                    <span id="statElapsed" class="stat-value">00:00</span>
+                    <span class="stat-label">Thời gian</span>
+                </div>
+
+                <div class="stat-chip">
+                    <span id="statRate" class="stat-value">0</span>
+                    <span class="stat-label">Cặp/phút</span>
+                </div>
+
+            </div>
+
         </div>
 
 
@@ -68,17 +86,20 @@
             id="scanMode"
             class="scan-mode old-mode"
         >
-            🔵 QUÉT TEM CŨ
+            <span class="scan-mode-dot"></span>
+            <span class="scan-mode-icon">🔵</span>
+            <span id="scanModeText" class="scan-mode-text">ĐANG QUÉT TEM CŨ</span>
         </div>
-        <div id="currentOldBox" class="current-old-box hidden">
-    <div class="current-old-label">
-        OLD BOX ĐANG GHÉP
-    </div>
 
-    <div id="currentOldValue" class="current-old-value">
-        -
-    </div>
-</div>
+        <div id="currentOldBox" class="current-old-box hidden">
+            <div class="current-old-label">
+                OLD BOX ĐANG GHÉP
+            </div>
+
+            <div id="currentOldValue" class="current-old-value">
+                -
+            </div>
+        </div>
 
         <div
             id="conditionText"
@@ -86,25 +107,34 @@
         ></div>
 
 
-        <div class="camera-box">
+        <div class="camera-wrap">
 
-            <video
-                id="camera"
-                autoplay
-                muted
-                playsinline
-            ></video>
+            <div class="camera-box">
 
-            <div class="scan-frame">
+                <video
+                    id="camera"
+                    autoplay
+                    muted
+                    playsinline
+                ></video>
 
-                <div class="corner top-left"></div>
-                <div class="corner top-right"></div>
-                <div class="corner bottom-left"></div>
-                <div class="corner bottom-right"></div>
+                <div class="scan-frame">
+
+                    <div class="corner top-left"></div>
+                    <div class="corner top-right"></div>
+                    <div class="corner bottom-left"></div>
+                    <div class="corner bottom-right"></div>
+
+                </div>
+
+                <div class="scan-line"></div>
+
+                <div id="resultFlash" class="result-flash">
+                    <div id="resultFlashIcon" class="result-flash-icon">✓</div>
+                    <div id="resultFlashText" class="result-flash-text"></div>
+                </div>
 
             </div>
-
-            <div class="scan-line"></div>
 
         </div>
 
@@ -115,6 +145,43 @@
         >
             📷 BẬT CAMERA
         </button>
+
+
+        <div class="camera-tools">
+
+            <button id="torchBtn" class="icon-btn hidden" title="Đèn flash">
+                🔦 ĐÈN
+            </button>
+
+            <button id="switchCamBtn" class="icon-btn hidden" title="Đổi camera">
+                🔄 ĐỔI CAM
+            </button>
+
+            <button id="soundBtn" class="icon-btn" title="Bật/tắt âm thanh">
+                🔊 ÂM
+            </button>
+
+            <button id="undoBtn" class="icon-btn" title="Hoàn tác cặp cuối" disabled>
+                ↩️ HOÀN TÁC
+            </button>
+
+        </div>
+
+
+        <div class="manual-entry">
+
+            <input
+                id="manualInput"
+                type="text"
+                placeholder="Nhập mã thủ công nếu QR lỗi..."
+                autocomplete="off"
+            >
+
+            <button id="manualBtn" class="secondary-btn">
+                NHẬP
+            </button>
+
+        </div>
 
 
         <div
@@ -177,12 +244,36 @@
             </div>
 
 
-            <button
-                id="refreshBtn"
-                class="secondary-btn small"
+            <div class="pairs-header-actions">
+
+                <button
+                    id="exportBtn"
+                    class="secondary-btn small"
+                    title="Xuất Excel"
+                >
+                    ⬇ EXCEL
+                </button>
+
+                <button
+                    id="refreshBtn"
+                    class="secondary-btn small"
+                >
+                    ↻
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div class="search-bar">
+
+            <input
+                id="searchInput"
+                type="text"
+                placeholder="🔍 Tìm theo mã OLD / NEW..."
+                autocomplete="off"
             >
-                ↻
-            </button>
 
         </div>
 
@@ -228,9 +319,14 @@
 </main>
 
 
+<div id="toastContainer" class="toast-container"></div>
+
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script src="https://unpkg.com/@zxing/library@0.21.2/umd/index.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <script src="js/config.js"></script>
 
